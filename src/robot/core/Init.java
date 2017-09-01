@@ -80,11 +80,18 @@ public class Init implements Runnable
 		Component[] comps = gamepad.getComponents();
 		for(Component c : comps)
 		{
+			char[] deadzoneChars = new String(c.getDeadZone() + "").toCharArray();
+			deadzoneChars[deadzoneChars.length - 1] = '1';
+			float deadzone = Float.parseFloat(new String(deadzoneChars));
+			
 			Identifier id = c.getIdentifier();
 			if(id.equals(Identifier.Axis.X))
 			{
 				float x = c.getPollData();
-				if(!(x > 0 && x < 0.1))	// Use 0.1 as deadzone
+				if(	!(
+						(x > 0 && x < deadzone)
+					||	(x < 0 && x > -deadzone)
+					))
 				{
 					axis_X = x;
 				}else axis_X = 0F;
@@ -92,7 +99,10 @@ public class Init implements Runnable
 			else if(id.equals(Identifier.Axis.Y))
 			{
 				float y = c.getPollData();
-				if(!(y < 0 && y > -0.02))
+				if(!(
+						(y > 0 && y < deadzone)
+					||	(y < 0 && y > -deadzone)
+					))
 				{
 					axis_Y = y;
 				}else axis_Y = 0F;
@@ -100,7 +110,10 @@ public class Init implements Runnable
 			else if(id.equals(Identifier.Axis.Z))
 			{	// The Left and Right trigger
 				float z = c.getPollData();
-				if(!(z < 0 && z > -0.01))
+				if(!(
+						(z < 0 && z > deadzone)
+					||	(z > 0 && z < deadzone)
+				))
 				{
 					axis_Z = z;
 				}else axis_Z = 0F;
