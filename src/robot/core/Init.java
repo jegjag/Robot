@@ -63,8 +63,14 @@ public class Init implements Runnable
 		pollThread.start();
 	}
 	
-	private static float axis_X = 0F;
-	private static float axis_Y = 0F;
+	public static float axis_X = 0F;
+	public static float axis_Y = 0F;
+	/** 
+	 * <strong>LT & RT</strong><br> 
+	 * Greater than zero means LT is pressed,<br>
+	 * Less than zero means RT is pressed.
+	 */
+	public static float axis_Z = 0F;
 	
 	private void update()
 	{
@@ -88,8 +94,16 @@ public class Init implements Runnable
 				float y = c.getPollData();
 				if(!(y < 0 && y > -0.02))
 				{
-					axis_Y = c.getPollData();
+					axis_Y = y;
 				}else axis_Y = 0F;
+			}
+			else if(id.equals(Identifier.Axis.Z))
+			{	// The Left and Right trigger
+				float z = c.getPollData();
+				if(!(z < 0 && z > -0.01))
+				{
+					axis_Z = z;
+				}else axis_Z = 0F;
 			}
 		}
 	}
@@ -104,6 +118,19 @@ public class Init implements Runnable
 		// Clear
 		g2d.setColor(Color.BLACK);
 		g2d.fillRect(0, 0, frame.getWidth(), frame.getHeight());
+		
+		// Show analog trigger status
+		float z = axis_Z;
+		if(axis_Z < 0)
+		{
+			g2d.setColor(new Color(0, 255, 0));
+			z *= -1;
+		}
+		else if(axis_Z > 0)
+		{
+			g2d.setColor(new Color(100, 0, 0));
+		}
+		g2d.fillRect(0, frame.getHeight() - round(z * frame.getHeight()), frame.getWidth(), round(z * frame.getHeight()));
 		
 		// Show position of left analog stick
 		int x = round(((frame.getWidth() / 2) + (axis_X * frame.getWidth() / 2)) - 5);
