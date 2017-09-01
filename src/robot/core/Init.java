@@ -123,7 +123,7 @@ public class Init implements Runnable
 		float z = axis_Z;
 		if(axis_Z < 0)
 		{
-			g2d.setColor(new Color(0, 255, 0));
+			g2d.setColor(new Color(0, 160, 0));
 			z *= -1;
 		}
 		else if(axis_Z > 0)
