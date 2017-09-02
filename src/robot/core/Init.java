@@ -1,11 +1,20 @@
 package robot.core;
 
 import static java.lang.Math.*;
+import static net.java.games.input.Component.Identifier.Button.*;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Toolkit;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Properties;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -17,28 +26,76 @@ import net.java.games.input.ControllerEnvironment;
 
 public class Init implements Runnable
 {
+	public static final File cfgFile = new File("trashboi.cfg");
+	public static final Properties SETTINGS = new Properties();
 	public static final int UPDATE_FREQ = 60;
 	
 	public static Controller gamepad = null;
 	public static Component steeringAnalog = null;
-	public static Thread pollThread;
+	public static Thread mainLoopThread;
 	
 	public static JFrame frame = new JFrame("Trashboy");
 	public static JPanel panel = new JPanel();
 	
-	public static void main(String[] args)
+	public static void main(String[] args) throws IOException, FileNotFoundException
 	{
-		//System prep
+		// System prep
 		System.setProperty("sun.java2d.opengl", "True");
 		
+		// Load config
+		boolean addDefaults = cfgFile.exists();
+		if(!addDefaults)
+		{
+			cfgFile.createNewFile();
+		}
+		
+		FileInputStream fis = new FileInputStream(cfgFile);
+		SETTINGS.load(fis);
+		fis.close();
+		
+		if(addDefaults)
+		{
+			SETTINGS.setProperty("remote_ip", "");
+			SETTINGS.setProperty("fullscreen", "true");
+			SETTINGS.setProperty("undecorated", "true");
+			SETTINGS.setProperty("width", "800");
+			SETTINGS.setProperty("height", "600");
+			FileOutputStream fos = new FileOutputStream(cfgFile);
+			SETTINGS.store(fos, "Config, you should know what you're doing if you're messing with this.");
+			fos.close();
+		}
+		
 		// Create Window stuff
-		frame.setSize(Toolkit.getDefaultToolkit().getScreenSize());
-		frame.setLocation(0, 0);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.add(panel);
-		frame.setUndecorated(true);
-		frame.setResizable(false);
-		frame.setVisible(true);
+		WindowAdapter callExitOnClose = new WindowAdapter()
+		{
+			@Override
+			public void windowClosing(WindowEvent e)
+			{
+				Init.exit();
+			}
+		};
+		
+		if(SETTINGS.getProperty("fullscreen").equalsIgnoreCase("true"))
+		{
+			frame.setSize(Toolkit.getDefaultToolkit().getScreenSize());
+			frame.setLocation(0, 0);
+			frame.add(panel);
+			frame.setUndecorated(true);
+			frame.setResizable(false);
+			frame.setVisible(true);
+		}
+		else
+		{
+			frame.setSize(Integer.parseInt(SETTINGS.getProperty("width", "800")), Integer.parseInt(SETTINGS.getProperty("height", "600")));
+			frame.setLocationRelativeTo(null);
+			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			frame.add(panel);
+			if(SETTINGS.getProperty("undecoracted").equalsIgnoreCase("true"))	frame.setUndecorated(true);
+			frame.setResizable(false);
+			frame.setVisible(true);
+		}
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		frame.addWindowListener(callExitOnClose);
 		
 		// JInput stuff (For XBAAWKS controller so I don't have to chase after the laptop)
 		Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
@@ -56,11 +113,28 @@ public class Init implements Runnable
 		if(gamepad == null)
 		{
 			System.err.println("No usable controller found, exiting...");
-			System.exit(0);
+			exit();
 		}
 		
-		pollThread = new Thread(new Init());
-		pollThread.start();
+		mainLoopThread = new Thread(new Init());
+		mainLoopThread.setName("Main Loop Thread");
+		mainLoopThread.start();
+	}
+	
+	public static void exit()
+	{
+		try
+		{
+			FileOutputStream fos = new FileOutputStream(cfgFile);
+			SETTINGS.store(fos, "The Config, you should know what you're doing if you're messing with this.");
+			fos.close();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		System.exit(0);
 	}
 	
 	public static float axis_X = 0F;
@@ -72,6 +146,13 @@ public class Init implements Runnable
 	 */
 	public static float axis_Z = 0F;
 	
+	private float deadzone = 0.1F;
+	
+	public boolean a_pressed = false, b_pressed = false, x_pressed = false, y_pressed = false,
+			lb_pressed = false, rb_pressed = false,
+			ls_down = false, rs_down = false,
+			start_pressed = false, back_pressed = false, xbox_pressed = false;
+	
 	private void update()
 	{
 		// Poll controller
@@ -82,7 +163,7 @@ public class Init implements Runnable
 		{
 			char[] deadzoneChars = new String(c.getDeadZone() + "").toCharArray();
 			deadzoneChars[deadzoneChars.length - 1] = '1';
-			float deadzone = Float.parseFloat(new String(deadzoneChars));
+			deadzone = Float.parseFloat(new String(deadzoneChars));
 			
 			Identifier id = c.getIdentifier();
 			if(id.equals(Identifier.Axis.X))
@@ -94,7 +175,8 @@ public class Init implements Runnable
 					))
 				{
 					axis_X = x;
-				}else axis_X = 0F;
+				}
+				else axis_X = 0F;
 			}
 			else if(id.equals(Identifier.Axis.Y))
 			{
@@ -105,21 +187,145 @@ public class Init implements Runnable
 					))
 				{
 					axis_Y = y;
-				}else axis_Y = 0F;
+				}
+				else axis_Y = 0F;
 			}
 			else if(id.equals(Identifier.Axis.Z))
 			{	// The Left and Right trigger
 				float z = c.getPollData();
-				if(!(
-						(z < 0 && z > deadzone)
-					||	(z > 0 && z < deadzone)
+				if(!(	// Deadzone on Z should be lower as they seem to be more accurate
+						(z < 0 && z > deadzone / 8)
+					||	(z > 0 && z < deadzone / 8)
 				))
 				{
 					axis_Z = z;
-				}else axis_Z = 0F;
+				}
+				else axis_Z = 0F;
+			}
+			else if(!c.isAnalog())
+			{
+				if(id.equals(_0))
+				{
+					if(c.getPollData() == 1.0F && !a_pressed)
+					{
+						a_pressed = true;
+					}
+					else if(c.getPollData() == 0.0F && a_pressed)
+					{
+						a_pressed = false;
+					}
+				}
+				else if(id.equals(_1))
+				{
+					if(c.getPollData() == 1.0F && !b_pressed)
+					{
+						b_pressed = true;
+					}
+					else if(c.getPollData() == 0.0F && b_pressed)
+					{
+						b_pressed = false;
+					}
+				}
+				else if(id.equals(_2))
+				{
+					if(c.getPollData() == 1.0F && !x_pressed)
+					{
+						x_pressed = true;
+					}
+					else if(c.getPollData() == 0.0F && x_pressed)
+					{
+						x_pressed = false;
+					}
+				}
+				else if(id.equals(_3))
+				{
+					if(c.getPollData() == 1.0F && !y_pressed)
+					{
+						y_pressed = true;
+					}
+					else if(c.getPollData() == 0.0F && y_pressed)
+					{
+						// Toggle showGrid
+						if(showGrid)	showGrid = false;
+						else showGrid = true;
+						
+						y_pressed = false;
+					}
+				}
+				else if(id.equals(_4))
+				{
+					if(c.getPollData() == 1.0F && !lb_pressed)
+					{
+						lb_pressed = true;
+					}
+					else if(c.getPollData() == 0.0F && lb_pressed)
+					{
+						lb_pressed = false;
+					}
+				}
+				else if(id.equals(_5))
+				{
+					if(c.getPollData() == 1.0F && !rb_pressed)
+					{
+						rb_pressed = true;
+					}
+					else if(c.getPollData() == 0.0F && rb_pressed)
+					{
+						rb_pressed = false;
+					}
+				}
+				else if(id.equals(_6))
+				{
+					if(c.getPollData() == 1.0F && !back_pressed)
+					{
+						back_pressed = true;
+					}
+					else if(c.getPollData() == 0.0F && back_pressed)
+					{
+						// EMERGENCY TERMINATE
+						exit();
+						
+						back_pressed = false;
+					}
+				}
+				else if(id.equals(_7))
+				{
+					if(c.getPollData() == 1.0F && !start_pressed)
+					{
+						start_pressed = true;
+					}
+					else if(c.getPollData() == 0.0F && start_pressed)
+					{
+						start_pressed = false;
+					}
+				}
+				else if(id.equals(_8))
+				{
+					if(c.getPollData() == 1.0F && !ls_down)
+					{
+						ls_down = true;
+					}
+					else if(c.getPollData() == 0.0F && ls_down)
+					{
+						ls_down = false;
+					}
+				}
+				else if(id.equals(_9))
+				{
+					if(c.getPollData() == 1.0F && !rs_down)
+					{
+						rs_down = true;
+					}
+					else if(c.getPollData() == 0.0F && rs_down)
+					{
+						rs_down = false;
+					}
+				}
 			}
 		}
 	}
+	
+	private boolean showGrid = true;
 	
 	private BufferedImage canvas = new BufferedImage(frame.getWidth(), frame.getHeight(), BufferedImage.TYPE_INT_RGB);
 	
@@ -144,6 +350,14 @@ public class Init implements Runnable
 			g2d.setColor(new Color(100, 0, 0));
 		}
 		g2d.fillRect(0, frame.getHeight() - round(z * frame.getHeight()), frame.getWidth(), round(z * frame.getHeight()));
+		
+		if(showGrid)
+		{
+			// Draw grid for X=0 and Y=0
+			g2d.setColor(Color.DARK_GRAY);
+			g2d.drawLine(frame.getWidth() / 2, 0, frame.getWidth() / 2, frame.getHeight());	// Y Plane
+			g2d.drawLine(0, frame.getHeight() / 2, frame.getWidth(), frame.getHeight() / 2);// X Plane
+		}
 		
 		// Show position of left analog stick
 		int x = round(((frame.getWidth() / 2) + (axis_X * frame.getWidth() / 2)) - 5);
