@@ -6,7 +6,7 @@
 	<classpathentry kind="src" path="natives"/>
 	<classpathentry kind="lib" path="lib/jinput-2.0.7.jar" sourcepath="lib/jinput-2.0.7-sources.jar">
 		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="KillDroid 420/natives"/>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Trashboi/natives"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/jutils-1.0.0.jar"/>
