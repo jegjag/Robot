@@ -4,10 +4,13 @@ import static java.lang.Math.*;
 import static net.java.games.input.Component.Identifier.Button.*;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,12 +26,15 @@ import net.java.games.input.Component;
 import net.java.games.input.Component.Identifier;
 import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
+import robot.net.NetworkHandler;
 
 public class Init implements Runnable
 {
 	public static final File cfgFile = new File("trashboi.cfg");
 	public static final Properties SETTINGS = new Properties();
 	public static final int UPDATE_FREQ = 60;
+	
+	public static NetworkHandler netHandler;
 	
 	public static Controller gamepad = null;
 	public static Component steeringAnalog = null;
@@ -37,25 +43,23 @@ public class Init implements Runnable
 	public static JFrame frame = new JFrame("Trashboy");
 	public static JPanel panel = new JPanel();
 	
+	public static final Image loadingIcon = getImg("resources/ui/loading.png");
+	
+	public static Image getImg(String path)
+	{
+		return Toolkit.getDefaultToolkit().createImage(path);
+	}
+	
 	public static void main(String[] args) throws IOException, FileNotFoundException
 	{
 		// System prep
 		System.setProperty("sun.java2d.opengl", "True");
 		
 		// Load config
-		boolean addDefaults = cfgFile.exists();
-		if(!addDefaults)
+		if(!cfgFile.exists())
 		{
 			cfgFile.createNewFile();
-		}
-		
-		FileInputStream fis = new FileInputStream(cfgFile);
-		SETTINGS.load(fis);
-		fis.close();
-		
-		if(addDefaults)
-		{
-			SETTINGS.setProperty("remote_ip", "");
+			SETTINGS.setProperty("socket_port", "27015");
 			SETTINGS.setProperty("fullscreen", "true");
 			SETTINGS.setProperty("undecorated", "true");
 			SETTINGS.setProperty("width", "800");
@@ -64,6 +68,10 @@ public class Init implements Runnable
 			SETTINGS.store(fos, "Config, you should know what you're doing if you're messing with this.");
 			fos.close();
 		}
+		
+		FileInputStream fis = new FileInputStream(cfgFile);
+		SETTINGS.load(fis);
+		fis.close();
 		
 		// Create Window stuff
 		WindowAdapter callExitOnClose = new WindowAdapter()
@@ -90,7 +98,7 @@ public class Init implements Runnable
 			frame.setLocationRelativeTo(null);
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			frame.add(panel);
-			if(SETTINGS.getProperty("undecoracted").equalsIgnoreCase("true"))	frame.setUndecorated(true);
+			if(SETTINGS.getProperty("undecorated").equalsIgnoreCase("true"))	frame.setUndecorated(true);
 			frame.setResizable(false);
 			frame.setVisible(true);
 		}
@@ -116,6 +124,10 @@ public class Init implements Runnable
 			exit();
 		}
 		
+		// Set up network
+		netHandler = new NetworkHandler(SETTINGS.getProperty("socket_port"));
+		
+		// Create main thread
 		mainLoopThread = new Thread(new Init());
 		mainLoopThread.setName("Main Loop Thread");
 		mainLoopThread.start();
@@ -329,6 +341,8 @@ public class Init implements Runnable
 	
 	private BufferedImage canvas = new BufferedImage(frame.getWidth(), frame.getHeight(), BufferedImage.TYPE_INT_RGB);
 	
+	private double rotAmount = 0D;
+	
 	private void render(double delta)
 	{
 		// Init
@@ -365,6 +379,28 @@ public class Init implements Runnable
 		
 		g2d.setColor(Color.RED);
 		g2d.fillOval(x, y, 10, 10);
+		
+		// UI Overlay
+		if(!netHandler.isConnected())
+		{
+			g2d.setColor(Color.GRAY);
+			g2d.setFont(new Font("Segoe UI", Font.BOLD, 62));
+			g2d.drawString("Establishing Network Connection",
+					frame.getWidth()
+					- 206
+					- g2d.getFontMetrics().stringWidth("Establishing Network Connection"),
+					226 - g2d.getFontMetrics().getHeight());
+			
+			x = (frame.getWidth() - 128);
+			y = 128;
+			
+			AffineTransform at = AffineTransform.getTranslateInstance(x, y);
+			at.translate(-64, -64);
+			at.rotate(rotAmount, 64, 64);
+			g2d.setTransform(at);
+			g2d.drawImage(loadingIcon, 0, 0, null);
+			rotAmount += 0.01D * delta;
+		}
 		
 		// Dispose
 		g2d.dispose();
