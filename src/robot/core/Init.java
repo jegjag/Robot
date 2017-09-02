@@ -22,7 +22,7 @@ public class Init implements Runnable
 	public static Component steeringAnalog = null;
 	public static Thread pollThread;
 	
-	public static JFrame frame = new JFrame("KillDroid 420 Controller");
+	public static JFrame frame = new JFrame("Trashboy");
 	public static JPanel panel = new JPanel();
 	
 	public static void main(String[] args)
@@ -44,7 +44,6 @@ public class Init implements Runnable
 		for(Controller c : controllers)
 		{
 			// Get controller name
-			System.out.println("Controller '" + c.getName() + "' detected.");
 			if(c.getType() == Controller.Type.GAMEPAD)
 			{
 				gamepad = c;

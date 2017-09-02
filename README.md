@@ -1,2 +1,2 @@
-# Killdroid 420 #
+# Trashboi #
 ## The best worst bot there is ##
