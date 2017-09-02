@@ -4,13 +4,11 @@ import static java.lang.Math.*;
 import static net.java.games.input.Component.Identifier.Button.*;
 
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,15 +24,12 @@ import net.java.games.input.Component;
 import net.java.games.input.Component.Identifier;
 import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
-import robot.net.NetworkHandler;
 
 public class Init implements Runnable
 {
 	public static final File cfgFile = new File("trashboi.cfg");
 	public static final Properties SETTINGS = new Properties();
 	public static final int UPDATE_FREQ = 60;
-	
-	public static NetworkHandler netHandler;
 	
 	public static Controller gamepad = null;
 	public static Component steeringAnalog = null;
@@ -123,9 +118,6 @@ public class Init implements Runnable
 			System.err.println("No usable controller found, exiting...");
 			exit();
 		}
-		
-		// Set up network
-		netHandler = new NetworkHandler(SETTINGS.getProperty("socket_port"));
 		
 		// Create main thread
 		mainLoopThread = new Thread(new Init());
@@ -381,16 +373,9 @@ public class Init implements Runnable
 		g2d.fillOval(x, y, 10, 10);
 		
 		// UI Overlay
-		if(!netHandler.isConnected())
+		/*if(false)
 		{
 			g2d.setColor(Color.GRAY);
-			g2d.setFont(new Font("Segoe UI", Font.BOLD, 62));
-			g2d.drawString("Establishing Network Connection",
-					frame.getWidth()
-					- 206
-					- g2d.getFontMetrics().stringWidth("Establishing Network Connection"),
-					226 - g2d.getFontMetrics().getHeight());
-			
 			x = (frame.getWidth() - 128);
 			y = 128;
 			
@@ -400,7 +385,7 @@ public class Init implements Runnable
 			g2d.setTransform(at);
 			g2d.drawImage(loadingIcon, 0, 0, null);
 			rotAmount += 0.01D * delta;
-		}
+		}*/
 		
 		// Dispose
 		g2d.dispose();
