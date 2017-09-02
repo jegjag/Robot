@@ -4,6 +4,7 @@ import static java.lang.Math.*;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JFrame;
@@ -31,8 +32,8 @@ public class Init implements Runnable
 		System.setProperty("sun.java2d.opengl", "True");
 		
 		// Create Window stuff
-		frame.setSize(800, 800);
-		frame.setLocationRelativeTo(null);
+		frame.setSize(Toolkit.getDefaultToolkit().getScreenSize());
+		frame.setLocation(0, 0);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.add(panel);
 		frame.setUndecorated(true);
