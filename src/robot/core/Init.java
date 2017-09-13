@@ -59,6 +59,7 @@ public class Init implements Runnable
 			SETTINGS.setProperty("undecorated", "true");
 			SETTINGS.setProperty("width", "800");
 			SETTINGS.setProperty("height", "600");
+			SETTINGS.setProperty("force_load", "false");
 			FileOutputStream fos = new FileOutputStream(cfgFile);
 			SETTINGS.store(fos, "Config, you should know what you're doing if you're messing with this.");
 			fos.close();
@@ -113,10 +114,13 @@ public class Init implements Runnable
 			}
 		}
 		
-		if(gamepad == null)
+		if(gamepad == null && !Boolean.parseBoolean(SETTINGS.getProperty("force_load")))
 		{
 			System.err.println("No usable controller found, exiting...");
 			exit();
+		}else if(Boolean.parseBoolean(SETTINGS.getProperty("force_load")))
+		{
+			System.out.println("Forcing load, DON'T EXPECT IT TO WORK.");
 		}
 		
 		// Create main thread
