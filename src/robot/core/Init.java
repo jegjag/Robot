@@ -35,7 +35,7 @@ public class Init implements Runnable
 	public static Component steeringAnalog = null;
 	public static Thread mainLoopThread;
 	
-	public static JFrame frame = new JFrame("Trashboy");
+	public static JFrame frame = new JFrame("Trashboi");
 	public static JPanel panel = new JPanel();
 	
 	public static final Image loadingIcon = getImg("resources/ui/loading.png");
@@ -105,7 +105,6 @@ public class Init implements Runnable
 		Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
 		for(Controller c : controllers)
 		{
-			// Get controller name
 			if(c.getType() == Controller.Type.GAMEPAD)
 			{
 				gamepad = c;
@@ -118,7 +117,8 @@ public class Init implements Runnable
 		{
 			System.err.println("No usable controller found, exiting...");
 			exit();
-		}else if(Boolean.parseBoolean(SETTINGS.getProperty("force_load")))
+		}
+		else if(Boolean.parseBoolean(SETTINGS.getProperty("force_load")))
 		{
 			System.out.println("Forcing load, DON'T EXPECT IT TO WORK.");
 		}
