@@ -159,7 +159,7 @@ public class Init implements Runnable
 	public boolean a_pressed = false, b_pressed = false, x_pressed = false, y_pressed = false,
 			lb_pressed = false, rb_pressed = false,
 			ls_down = false, rs_down = false,
-			start_pressed = false, back_pressed = false, xbox_pressed = false;
+			start_pressed = false, back_pressed = false;
 	
 	private void update()
 	{
@@ -177,7 +177,7 @@ public class Init implements Runnable
 			if(id.equals(Identifier.Axis.X))
 			{
 				float x = c.getPollData();
-				if(	!(
+				if(!(
 						(x > 0 && x < deadzone)
 					||	(x < 0 && x > -deadzone)
 					))
