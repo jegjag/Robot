@@ -38,8 +38,6 @@ public class Init implements Runnable
 	public static JFrame frame = new JFrame("Trashboi");
 	public static JPanel panel = new JPanel();
 	
-	public static final Image loadingIcon = getImg("resources/ui/loading.png");
-	
 	public static Image getImg(String path)
 	{
 		return Toolkit.getDefaultToolkit().createImage(path);
