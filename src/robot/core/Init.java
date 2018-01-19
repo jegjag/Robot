@@ -337,7 +337,7 @@ public class Init implements Runnable
 	
 	private BufferedImage canvas = new BufferedImage(frame.getWidth(), frame.getHeight(), BufferedImage.TYPE_INT_RGB);
 	
-	private double rotAmount = 0D;
+	//private double rotAmount = 0D;
 	
 	private void render(double delta)
 	{
