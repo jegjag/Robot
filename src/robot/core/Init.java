@@ -1,7 +1,6 @@
 package robot.core;
 
 import static java.lang.Math.*;
-import static net.java.games.input.Component.Identifier.Button.*;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -20,8 +19,6 @@ import java.util.Properties;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import net.java.games.input.Component;
-import net.java.games.input.Component.Identifier;
 import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
 import robot.input.ControllerHandler;
