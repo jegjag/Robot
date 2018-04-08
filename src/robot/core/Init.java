@@ -141,7 +141,8 @@ public class Init
 	
 	private static void update()
 	{
-		
+		// Update controllers
+		cHandler.update();
 	}
 	
 	public static boolean showGrid = true;
