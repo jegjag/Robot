@@ -24,16 +24,19 @@ import net.java.games.input.Component;
 import net.java.games.input.Component.Identifier;
 import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
+import robot.input.ControllerHandler;
 
-public class Init implements Runnable
+public class Init
 {
 	public static final File cfgFile = new File("trashboi.cfg");
 	public static final Properties SETTINGS = new Properties();
+	
 	public static final int UPDATE_FREQ = 60;
 	
-	public static Controller gamepad = null;
-	public static Component steeringAnalog = null;
 	public static Thread mainLoopThread;
+	
+	public static Controller gamepad = null;
+	public static ControllerHandler cHandler = null;
 	
 	public static JFrame frame = new JFrame("Trashboi");
 	public static JPanel panel = new JPanel();
@@ -52,12 +55,11 @@ public class Init implements Runnable
 		if(!cfgFile.exists())
 		{
 			cfgFile.createNewFile();
-			SETTINGS.setProperty("socket_port", "27015");
+			SETTINGS.setProperty("socket_port", "29914");
 			SETTINGS.setProperty("fullscreen", "true");
 			SETTINGS.setProperty("undecorated", "true");
 			SETTINGS.setProperty("width", "800");
 			SETTINGS.setProperty("height", "600");
-			SETTINGS.setProperty("force_load", "false");
 			FileOutputStream fos = new FileOutputStream(cfgFile);
 			SETTINGS.store(fos, "Config, you should know what you're doing if you're messing with this.");
 			fos.close();
@@ -106,25 +108,22 @@ public class Init implements Runnable
 			if(c.getType() == Controller.Type.GAMEPAD)
 			{
 				gamepad = c;
+				cHandler = new ControllerHandler(gamepad);
 				System.out.println("Set '" + gamepad.getName() + "' as controller.");
 				continue;
 			}
 		}
 		
-		if(gamepad == null && !Boolean.parseBoolean(SETTINGS.getProperty("force_load")))
+		if(gamepad == null)
 		{
-			System.err.println("No usable controller found, exiting...");
-			exit();
-		}
-		else if(Boolean.parseBoolean(SETTINGS.getProperty("force_load")))
-		{
-			System.out.println("Forcing load, DON'T EXPECT IT TO WORK.");
+			// Set keyboard/network mode
+			
+			// Keyboard
+			
 		}
 		
 		// Create main thread
-		mainLoopThread = new Thread(new Init());
-		mainLoopThread.setName("Main Loop Thread");
-		mainLoopThread.start();
+		run();
 	}
 	
 	public static void exit()
@@ -143,201 +142,18 @@ public class Init implements Runnable
 		System.exit(0);
 	}
 	
-	public static float axis_X = 0F;
-	public static float axis_Y = 0F;
-	/** 
-	 * <strong>LT & RT</strong><br> 
-	 * Greater than zero means LT is pressed,<br>
-	 * Less than zero means RT is pressed.
-	 */
-	public static float axis_Z = 0F;
-	
-	private float deadzone = 0.1F;
-	
-	public boolean a_pressed = false, b_pressed = false, x_pressed = false, y_pressed = false,
-			lb_pressed = false, rb_pressed = false,
-			ls_down = false, rs_down = false,
-			start_pressed = false, back_pressed = false;
-	
-	private void update()
+	private static void update()
 	{
-		// Poll controller
-		gamepad.poll();
 		
-		Component[] comps = gamepad.getComponents();
-		for(Component c : comps)
-		{
-			char[] deadzoneChars = new String(c.getDeadZone() + "").toCharArray();
-			deadzoneChars[deadzoneChars.length - 1] = '1';
-			deadzone = Float.parseFloat(new String(deadzoneChars));
-			
-			Identifier id = c.getIdentifier();
-			if(id.equals(Identifier.Axis.X))
-			{
-				float x = c.getPollData();
-				if(!(
-						(x > 0 && x < deadzone)
-					||	(x < 0 && x > -deadzone)
-					))
-				{
-					axis_X = x;
-				}
-				else axis_X = 0F;
-			}
-			else if(id.equals(Identifier.Axis.Y))
-			{
-				float y = c.getPollData();
-				if(!(
-						(y > 0 && y < deadzone)
-					||	(y < 0 && y > -deadzone)
-					))
-				{
-					axis_Y = y;
-				}
-				else axis_Y = 0F;
-			}
-			else if(id.equals(Identifier.Axis.Z))
-			{	// The Left and Right trigger
-				float z = c.getPollData();
-				if(!(	// Deadzone on Z should be lower as they seem to be more accurate
-						(z < 0 && z > deadzone / 8)
-					||	(z > 0 && z < deadzone / 8)
-				))
-				{
-					axis_Z = z;
-				}
-				else axis_Z = 0F;
-			}
-			else if(!c.isAnalog())
-			{
-				if(id.equals(_0))
-				{
-					if(c.getPollData() == 1.0F && !a_pressed)
-					{
-						a_pressed = true;
-					}
-					else if(c.getPollData() == 0.0F && a_pressed)
-					{
-						a_pressed = false;
-					}
-				}
-				else if(id.equals(_1))
-				{
-					if(c.getPollData() == 1.0F && !b_pressed)
-					{
-						b_pressed = true;
-					}
-					else if(c.getPollData() == 0.0F && b_pressed)
-					{
-						b_pressed = false;
-					}
-				}
-				else if(id.equals(_2))
-				{
-					if(c.getPollData() == 1.0F && !x_pressed)
-					{
-						x_pressed = true;
-					}
-					else if(c.getPollData() == 0.0F && x_pressed)
-					{
-						x_pressed = false;
-					}
-				}
-				else if(id.equals(_3))
-				{
-					if(c.getPollData() == 1.0F && !y_pressed)
-					{
-						y_pressed = true;
-					}
-					else if(c.getPollData() == 0.0F && y_pressed)
-					{
-						// Toggle showGrid
-						if(showGrid)	showGrid = false;
-						else showGrid = true;
-						
-						y_pressed = false;
-					}
-				}
-				else if(id.equals(_4))
-				{
-					if(c.getPollData() == 1.0F && !lb_pressed)
-					{
-						lb_pressed = true;
-					}
-					else if(c.getPollData() == 0.0F && lb_pressed)
-					{
-						lb_pressed = false;
-					}
-				}
-				else if(id.equals(_5))
-				{
-					if(c.getPollData() == 1.0F && !rb_pressed)
-					{
-						rb_pressed = true;
-					}
-					else if(c.getPollData() == 0.0F && rb_pressed)
-					{
-						rb_pressed = false;
-					}
-				}
-				else if(id.equals(_6))
-				{
-					if(c.getPollData() == 1.0F && !back_pressed)
-					{
-						back_pressed = true;
-					}
-					else if(c.getPollData() == 0.0F && back_pressed)
-					{
-						// EMERGENCY TERMINATE
-						exit();
-						
-						back_pressed = false;
-					}
-				}
-				else if(id.equals(_7))
-				{
-					if(c.getPollData() == 1.0F && !start_pressed)
-					{
-						start_pressed = true;
-					}
-					else if(c.getPollData() == 0.0F && start_pressed)
-					{
-						start_pressed = false;
-					}
-				}
-				else if(id.equals(_8))
-				{
-					if(c.getPollData() == 1.0F && !ls_down)
-					{
-						ls_down = true;
-					}
-					else if(c.getPollData() == 0.0F && ls_down)
-					{
-						ls_down = false;
-					}
-				}
-				else if(id.equals(_9))
-				{
-					if(c.getPollData() == 1.0F && !rs_down)
-					{
-						rs_down = true;
-					}
-					else if(c.getPollData() == 0.0F && rs_down)
-					{
-						rs_down = false;
-					}
-				}
-			}
-		}
 	}
 	
-	private boolean showGrid = true;
+	public static boolean showGrid = true;
 	
-	private BufferedImage canvas = new BufferedImage(frame.getWidth(), frame.getHeight(), BufferedImage.TYPE_INT_RGB);
+	private static BufferedImage canvas;
 	
 	//private double rotAmount = 0D;
 	
-	private void render(double delta)
+	private static void render(double delta)
 	{
 		// Init
 		Graphics2D g2d = canvas.createGraphics();
@@ -347,13 +163,13 @@ public class Init implements Runnable
 		g2d.fillRect(0, 0, frame.getWidth(), frame.getHeight());
 		
 		// Show analog trigger status
-		float z = axis_Z;
-		if(axis_Z < 0)
+		float z = cHandler.axis_z;
+		if(cHandler.axis_z < 0)
 		{
 			g2d.setColor(new Color(0, 160, 0));
 			z *= -1;
 		}
-		else if(axis_Z > 0)
+		else if(cHandler.axis_z > 0)
 		{
 			g2d.setColor(new Color(100, 0, 0));
 		}
@@ -368,8 +184,8 @@ public class Init implements Runnable
 		}
 		
 		// Show position of left analog stick
-		int x = round(((frame.getWidth() / 2) + (axis_X * frame.getWidth() / 2)) - 5);
-		int y = round((frame.getHeight() / 2) + (axis_Y * frame.getHeight() / 2) - 5);
+		int x = round(((frame.getWidth() / 2) + (cHandler.axis_x * frame.getWidth() / 2)) - 5);
+		int y = round((frame.getHeight() / 2) + (cHandler.axis_y * frame.getHeight() / 2) - 5);
 		
 		g2d.setColor(Color.RED);
 		g2d.fillOval(x, y, 10, 10);
@@ -398,15 +214,17 @@ public class Init implements Runnable
 		g2d.dispose();
 	}
 	
-	@Override
-	public void run()
+	private static void run()
 	{
 		//Start loop
 		final long UPDATE_NANOS = 1000000000 / UPDATE_FREQ;
 		long previous = System.nanoTime();
 		long delay = 0L;
 		
-		while(true){
+		canvas = new BufferedImage(frame.getWidth(), frame.getHeight(), BufferedImage.TYPE_INT_RGB);
+		
+		while(true)
+		{
 			long current = System.nanoTime();
 			long elapsed = current - previous;
 			previous = current;
@@ -415,7 +233,8 @@ public class Init implements Runnable
 			//Pre-update stuff goes here
 			
 			//Update loop until catchup to real time, or if certain amount of time passed.
-			while(delay >= UPDATE_NANOS){
+			while(delay >= UPDATE_NANOS)
+			{
 				update();
 				delay -= UPDATE_NANOS;
 			}
