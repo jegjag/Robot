@@ -3,6 +3,7 @@ package robot.core;
 import static java.lang.Math.*;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -21,7 +22,9 @@ import javax.swing.JPanel;
 
 import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
+
 import robot.input.ControllerHandler;
+import robot.input.KeyboardHandler;
 
 public class Init
 {
@@ -34,6 +37,9 @@ public class Init
 	
 	public static Controller gamepad = null;
 	public static ControllerHandler cHandler = null;
+	
+	public static Controller keyboard = null;
+	public static KeyboardHandler kHandler = null;
 	
 	public static JFrame frame = new JFrame("Trashboi");
 	public static JPanel panel = new JPanel();
@@ -52,11 +58,13 @@ public class Init
 		if(!cfgFile.exists())
 		{
 			cfgFile.createNewFile();
+			
 			SETTINGS.setProperty("socket_port", "29914");
 			SETTINGS.setProperty("fullscreen", "true");
 			SETTINGS.setProperty("undecorated", "true");
 			SETTINGS.setProperty("width", "800");
 			SETTINGS.setProperty("height", "600");
+			
 			FileOutputStream fos = new FileOutputStream(cfgFile);
 			SETTINGS.store(fos, "Config, you should know what you're doing if you're messing with this.");
 			fos.close();
@@ -91,7 +99,8 @@ public class Init
 			frame.setLocationRelativeTo(null);
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			frame.add(panel);
-			if(SETTINGS.getProperty("undecorated").equalsIgnoreCase("true"))	frame.setUndecorated(true);
+			if(SETTINGS.getProperty("undecorated").equalsIgnoreCase("true"))
+				frame.setUndecorated(true);
 			frame.setResizable(false);
 			frame.setVisible(true);
 		}
@@ -107,16 +116,14 @@ public class Init
 				gamepad = c;
 				cHandler = new ControllerHandler(gamepad);
 				System.out.println("Set '" + gamepad.getName() + "' as controller.");
-				continue;
+				break;
 			}
-		}
-		
-		if(gamepad == null)
-		{
-			// Set keyboard/network mode
 			
-			// Keyboard
-			
+			if(c.getType() == Controller.Type.KEYBOARD)
+			{
+				keyboard = c;
+				kHandler = new KeyboardHandler(keyboard);
+			}
 		}
 		
 		// Create main thread
@@ -142,7 +149,14 @@ public class Init
 	private static void update()
 	{
 		// Update controllers
-		cHandler.update();
+		if(cHandler != null)
+		{
+			cHandler.update();
+		}
+		else if(kHandler != null)
+		{
+			kHandler.update();
+		}
 	}
 	
 	public static boolean showGrid = true;
@@ -161,48 +175,62 @@ public class Init
 		g2d.fillRect(0, 0, frame.getWidth(), frame.getHeight());
 		
 		// Show analog trigger status
-		float z = cHandler.axis_z;
-		if(cHandler.axis_z < 0)
+		if(gamepad != null)
 		{
-			g2d.setColor(new Color(0, 160, 0));
-			z *= -1;
-		}
-		else if(cHandler.axis_z > 0)
-		{
-			g2d.setColor(new Color(100, 0, 0));
-		}
-		g2d.fillRect(0, frame.getHeight() - round(z * frame.getHeight()), frame.getWidth(), round(z * frame.getHeight()));
-		
-		if(showGrid)
-		{
-			// Draw grid for X=0 and Y=0
-			g2d.setColor(Color.DARK_GRAY);
-			g2d.drawLine(frame.getWidth() / 2, 0, frame.getWidth() / 2, frame.getHeight());	// Y Plane
-			g2d.drawLine(0, frame.getHeight() / 2, frame.getWidth(), frame.getHeight() / 2);// X Plane
-		}
-		
-		// Show position of left analog stick
-		int x = round(((frame.getWidth() / 2) + (cHandler.axis_x * frame.getWidth() / 2)) - 5);
-		int y = round((frame.getHeight() / 2) + (cHandler.axis_y * frame.getHeight() / 2) - 5);
-		
-		g2d.setColor(Color.RED);
-		g2d.fillOval(x, y, 10, 10);
-		
-		// UI Overlay
-		/*if(false)
-		{
-			g2d.setColor(Color.GRAY);
-			x = (frame.getWidth() - 128);
-			y = 128;
+			// Gamepad UI
 			
-			AffineTransform at = AffineTransform.getTranslateInstance(x, y);
-			at.translate(-64, -64);
-			at.rotate(rotAmount, 64, 64);
-			g2d.setTransform(at);
-			g2d.drawImage(loadingIcon, 0, 0, null);
-			rotAmount += 0.01D * delta;
-		}*/
-		
+			float z = cHandler.axis_z;
+			if(cHandler.axis_z < 0)
+			{
+				g2d.setColor(new Color(0, 160, 0));
+				z *= -1;
+			}
+			else if(cHandler.axis_z > 0)
+			{
+				g2d.setColor(new Color(100, 0, 0));
+			}
+			g2d.fillRect(0, frame.getHeight() - round(z * frame.getHeight()), frame.getWidth(), round(z * frame.getHeight()));
+			
+			if(showGrid)
+			{
+				// Draw grid for X=0 and Y=0
+				g2d.setColor(Color.DARK_GRAY);
+				g2d.drawLine(frame.getWidth() / 2, 0, frame.getWidth() / 2, frame.getHeight());	// Y Plane
+				g2d.drawLine(0, frame.getHeight() / 2, frame.getWidth(), frame.getHeight() / 2);// X Plane
+			}
+			
+			// Show position of left analog stick
+			int x = round(((frame.getWidth() / 2) + (cHandler.axis_x * frame.getWidth() / 2)) - 5);
+			int y = round((frame.getHeight() / 2) + (cHandler.axis_y * frame.getHeight() / 2) - 5);
+			
+			g2d.setColor(Color.RED);
+			g2d.fillOval(x, y, 10, 10);
+			
+			// UI Overlay
+			/*if(false)
+			{
+				g2d.setColor(Color.GRAY);
+				x = (frame.getWidth() - 128);
+				y = 128;
+				
+				AffineTransform at = AffineTransform.getTranslateInstance(x, y);
+				at.translate(-64, -64);
+				at.rotate(rotAmount, 64, 64);
+				g2d.setTransform(at);
+				g2d.drawImage(loadingIcon, 0, 0, null);
+				rotAmount += 0.01D * delta;
+			}*/
+		}
+		else
+		{
+			// Keyboard / Network UI
+			
+			final String msg = "Keyboard Mode";
+			g2d.setFont(new Font("Open Sans", Font.BOLD, 72));
+			g2d.setColor(Color.WHITE);
+			g2d.drawString(msg, (frame.getWidth() / 2) - (g2d.getFontMetrics().stringWidth(msg) / 2),
+					(frame.getHeight() / 2) - (g2d.getFontMetrics().getHeight() / 2));
+		}
 		// Dispose
 		g2d.dispose();
 		
