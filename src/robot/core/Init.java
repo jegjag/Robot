@@ -205,21 +205,6 @@ public class Init
 			
 			g2d.setColor(Color.RED);
 			g2d.fillOval(x, y, 10, 10);
-			
-			// UI Overlay
-			/*if(false)
-			{
-				g2d.setColor(Color.GRAY);
-				x = (frame.getWidth() - 128);
-				y = 128;
-				
-				AffineTransform at = AffineTransform.getTranslateInstance(x, y);
-				at.translate(-64, -64);
-				at.rotate(rotAmount, 64, 64);
-				g2d.setTransform(at);
-				g2d.drawImage(loadingIcon, 0, 0, null);
-				rotAmount += 0.01D * delta;
-			}*/
 		}
 		else
 		{

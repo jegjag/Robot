@@ -60,6 +60,10 @@ public class ControllerHandler
 					) {
 						axis_z = val;
 					}
+					else
+					{
+						axis_z = 0.0f;
+					}
 				}
 				else if(
 					!(	(val > 0 && val < deadzone)
@@ -73,6 +77,17 @@ public class ControllerHandler
 					if(id == Axis.Y)
 					{
 						axis_y = val;
+					}
+				}
+				else
+				{
+					if(id == Axis.X)
+					{
+						axis_x = 0.0f;
+					}
+					if(id == Axis.Y)
+					{
+						axis_y = 0.0f;
 					}
 				}
 			}
