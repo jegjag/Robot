@@ -43,7 +43,7 @@ public class Arduino implements Closeable
 		CommPortIdentifier id = findPortID();
 		if(id == null)
 		{
-			System.err.println("Could not find COM port.");
+			System.err.println("Could not find Arduino on COM port (USB).");
 			System.exit(-1);
 		}
 		

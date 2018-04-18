@@ -30,6 +30,7 @@ public class Init
 {
 	public static final File cfgFile = new File("trashboi.cfg");
 	public static final Properties SETTINGS = new Properties();
+	public static Arduino arduino;
 	
 	public static final int UPDATE_FREQ = 60;
 	
@@ -126,6 +127,8 @@ public class Init
 			}
 		}
 		
+		arduino = new Arduino();
+		
 		// Create main thread
 		run();
 	}
@@ -178,7 +181,6 @@ public class Init
 		if(gamepad != null)
 		{
 			// Gamepad UI
-			
 			float z = cHandler.axis_z;
 			if(cHandler.axis_z < 0)
 			{
