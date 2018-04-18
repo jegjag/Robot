@@ -3,17 +3,7 @@
 
 #define DATA_RATE 9600
 #define TIMEOUT 1000
-#define BUFFER_SIZE 128
-
-// Motor A pins
-#define A_BRAKE 9
-#define A_DIR 12
-#define A_ANALOG 3
-
-// Motor B pins
-#define B_BRAKE 8
-#define B_DIR 13
-#define B_ANALOG 11
+#define BUFFER_SIZE 32
 
 void setup()
 {
