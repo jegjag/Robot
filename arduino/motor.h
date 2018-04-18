@@ -1,0 +1,4 @@
+enum Motor
+{
+    A, B
+};

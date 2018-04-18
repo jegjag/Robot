@@ -1,5 +1,9 @@
+#include "motor.h"
+#include "direction.h"
+
 #define DATA_RATE 9600
 #define TIMEOUT 1000
+#define BUFFER_SIZE 128
 
 // Motor A pins
 #define A_BRAKE 9
@@ -24,7 +28,7 @@ void setup()
     pinMode(B_BRAKE, OUTPUT);   // Initialise Motor B Brake
 }
 
-int readLine(char* buf, int bufferSize, String &ret)
+inline int readLine(char* buf, int bufferSize, String &ret)
 {
     if(Serial.available() <= 0)
     {
@@ -42,16 +46,6 @@ int readLine(char* buf, int bufferSize, String &ret)
 }
 
 String line;
-
-typedef enum
-{
-    A, B
-} Motor;
-
-typedef enum
-{
-    FORWARD, BACKWARD
-} Direction;
 
 inline void brake(Motor motor)
 {
@@ -100,9 +94,11 @@ inline void setMotor(Motor m, Direction d, int spd)
     }
 }
 
+char b[BUFFER_SIZE];
+
 void loop()
 {
-    int n = readLine(buffer, sizeof(buffer), line);
+    int n = readLine(b, sizeof(b), line);
     
     if(n <= 0)
     {
@@ -112,16 +108,15 @@ void loop()
     // Process line
     // Motor
     Motor motor;
-    String line_noMotor;
     if(line.startsWith("A"))
     {
         motor = A;
-        line_noMotor = line.replace("A", "");
+        line.replace("A", "");
     }
     else if(line.startsWith("B"))
     {
         motor = B;
-        line_noMotor = line.replace("B", "");
+        line.replace("B", "");
     }
     else
     {
@@ -130,16 +125,15 @@ void loop()
     
     // Direction (Up/Down to not conflict B for backwards)
     Direction d;
-    String line_noDir;
     if(line.startsWith("U"))
     {
         d = FORWARD;
-        line_noDir = line.replace("U", "");
+        line.replace("U", "");
     }
     else if(line.startsWith("D"))
     {
         d = BACKWARD;
-        line_noDir = line.replace("D", "");
+        line.replace("D", "");
     }
     else if(line.startsWith("S"))
     {
@@ -152,7 +146,7 @@ void loop()
     }
     
     // Speed
-    int spd = line_noDir.toInt();
+    int spd = line.toInt();
     if(spd <= 0)
     {
         brake(motor);
