@@ -22,6 +22,7 @@ public class Arduino implements Closeable
 		
 		// Windows
 		"COM3",
+		"COM4",
 		
 		// Mac
 		"/dev/tty.usbserial-A9007UX1"
@@ -103,6 +104,16 @@ public class Arduino implements Closeable
 	 */
 	public void send(Motor m, Direction d, int speed)
 	{
+		if(speed >= 254)
+		{
+			speed = 255;
+		}
+		
+		if(speed < 0)
+		{
+			speed = 0;
+		}
+		
 		sendString(m.symbol + d.symbol + speed);
 	}
 	
@@ -116,6 +127,7 @@ public class Arduino implements Closeable
 	 */
 	public void sendString(String command)
 	{
+		System.out.println(command);
 		try
 		{
 			writer.write(command, 0, command.length());

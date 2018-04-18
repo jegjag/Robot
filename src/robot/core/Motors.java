@@ -41,7 +41,7 @@ public class Motors
 			speed = 0;
 			return;
 		}
-		speed = round(255 / abs(axis));
+		speed = round(255 * abs(axis));
 	}
 	
 	public void send()

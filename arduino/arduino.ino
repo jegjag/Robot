@@ -1,6 +1,9 @@
 #include "motor.h"
 #include "direction.h"
 
+#define FLIP_A false
+#define FLIP_B true
+
 #define DATA_RATE 9600
 #define TIMEOUT 1000
 #define BUFFER_SIZE 32
@@ -55,31 +58,55 @@ inline void setMotor(Motor m, Direction d, int spd)
 	if(m == A)
 	{
 		digitalWrite(A_BRAKE, LOW);
-
-		if(d == FORWARD)
+		if(!FLIP_A)
 		{
-			digitalWrite(A_DIR, HIGH);
+			if(d == FORWARD)
+			{
+				digitalWrite(A_DIR, HIGH);
+			}
+			else if(d == BACKWARD)
+			{
+				digitalWrite(A_DIR, LOW);
+			}
 		}
-		else if(d == BACKWARD)
+		else
 		{
-			digitalWrite(A_DIR, LOW);
+			if(d == FORWARD)
+			{
+				digitalWrite(A_DIR, LOW);
+			}
+			else if(d == BACKWARD)
+			{
+				digitalWrite(A_DIR, HIGH);
+			}
 		}
-
 		analogWrite(A_ANALOG, spd);
 	}
 	else if(m == B)
 	{
 		digitalWrite(B_BRAKE, LOW);
-
-		if(d == FORWARD)
+		if(!FLIP_B)
 		{
-			digitalWrite(B_DIR, HIGH);
+			if(d == FORWARD)
+			{
+				digitalWrite(B_DIR, HIGH);
+			}
+			else if(d == BACKWARD)
+			{
+				digitalWrite(B_DIR, LOW);
+			}
 		}
-		else if(d == BACKWARD)
+		else
 		{
-			digitalWrite(B_DIR, LOW);
+			if(d == FORWARD)
+			{
+				digitalWrite(B_DIR, LOW);
+			}
+			if(d == BACKWARD)
+			{
+				digitalWrite(B_DIR, HIGH);
+			}
 		}
-
 		analogWrite(B_ANALOG, spd);
 	}
 }
