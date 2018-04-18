@@ -31,6 +31,7 @@ public class Init
 	public static final File cfgFile = new File("trashboi.cfg");
 	public static final Properties SETTINGS = new Properties();
 	public static Arduino arduino;
+	public static Motors motors;
 	
 	public static final int UPDATE_FREQ = 60;
 	
@@ -128,6 +129,7 @@ public class Init
 		}
 		
 		arduino = new Arduino();
+		motors = new Motors(arduino);
 		
 		// Create main thread
 		run();
@@ -155,11 +157,16 @@ public class Init
 		if(cHandler != null)
 		{
 			cHandler.update();
+			motors.forward(cHandler.axis_z);
 		}
 		else if(kHandler != null)
 		{
 			kHandler.update();
+			motors.forward(kHandler.accelAxis);
 		}
+		
+		// Update arduino
+		motors.send();
 	}
 	
 	public static boolean showGrid = true;

@@ -12,6 +12,8 @@ public class KeyboardHandler
 {
 	private Controller keyboard;
 	
+	public float accelAxis = 0.0f;
+	
 	public KeyboardHandler(Controller keyboard)
 	{
 		this.keyboard = keyboard;
@@ -27,16 +29,20 @@ public class KeyboardHandler
 			float val = c.getPollData();
 			Identifier id = c.getIdentifier();
 			
+			accelAxis = 0.0f;
+			
 			if(val == 1.0f)
 			{
 				if(id == W)
 				{
 					// Forward
+					accelAxis += 1.0f;
 				}
 				
 				if(id == S)
 				{
 					// Backward
+					accelAxis -= 1.0f;
 				}
 				
 				if(id == A)
