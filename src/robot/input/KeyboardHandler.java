@@ -12,6 +12,8 @@ public class KeyboardHandler
 {
 	private Controller keyboard;
 	
+	private boolean w_pressed = false, s_pressed = false;
+	
 	public float accelAxis = 0.0f;
 	
 	public KeyboardHandler(Controller keyboard)
@@ -29,20 +31,17 @@ public class KeyboardHandler
 			float val = c.getPollData();
 			Identifier id = c.getIdentifier();
 			
-			accelAxis = 0.0f;
-			
 			if(val == 1.0f)
 			{
 				if(id == W)
 				{
 					// Forward
-					accelAxis += 1.0f;
+					w_pressed = true;
 				}
-				
 				if(id == S)
 				{
 					// Backward
-					accelAxis -= 1.0f;
+					s_pressed = true;
 				}
 				
 				if(id == A)
@@ -61,6 +60,34 @@ public class KeyboardHandler
 					exit();
 				}
 			}
+			else if(val == 0.0f)
+			{
+				if(id == W)
+				{
+					w_pressed = false;
+				}
+				if(id == S)
+				{
+					s_pressed = false;
+				}
+			}
+		}
+		
+		if(w_pressed && s_pressed)
+		{
+			accelAxis = 0.0f;
+		}
+		else if(w_pressed)
+		{
+			accelAxis = 1.0f;
+		}
+		else if(s_pressed)
+		{
+			accelAxis = -1.0f;
+		}
+		else
+		{
+			accelAxis = 0.0f;
 		}
 	}
 }

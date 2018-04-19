@@ -109,7 +109,7 @@ public class Init
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.addWindowListener(callExitOnClose);
 		
-		// JInput stuff (For XBAAWKS controller so I don't have to chase after the laptop)
+		// JInput stuff (For xbox controller so I don't have to chase after the laptop)
 		Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
 		for(Controller c : controllers)
 		{
@@ -158,15 +158,14 @@ public class Init
 		{
 			cHandler.update();
 			motors.forward(cHandler.axis_z);
+			motors.send();
 		}
 		else if(kHandler != null)
 		{
 			kHandler.update();
 			motors.forward(kHandler.accelAxis);
+			motors.send();
 		}
-		
-		// Update arduino
-		motors.send();
 	}
 	
 	public static boolean showGrid = true;

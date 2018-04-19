@@ -175,4 +175,5 @@ void loop()
 	}
 
 	setMotor(motor, d, spd);
+	delay(16);
 }
