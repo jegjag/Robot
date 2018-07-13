@@ -172,8 +172,6 @@ public class Init
 	
 	private static BufferedImage canvas;
 	
-	//private double rotAmount = 0D;
-	
 	private static void render(double delta)
 	{
 		// Init

@@ -1,6 +1,6 @@
 package robot.core;
 
-public class Motor
+public class Properties
 {
 	public Direction direction;
 	public int speed;
