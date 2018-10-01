@@ -1,2 +1,3 @@
 # Trashboi #
-## The best worst bot there is ##
+
+Todo make this
