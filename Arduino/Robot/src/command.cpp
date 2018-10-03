@@ -15,7 +15,7 @@ Command Protocol::getCommand(String command)
 	Command c;
 
 	#ifdef DEBUG_MESSAGES
-	char buffer[35];	// 35 should be exactly enough to store the string.
+	char buffer[50];	// 50 should be exactly enough to store the string.
 	#endif
 
 	switch(cmd[0])
@@ -50,7 +50,7 @@ Command Protocol::getCommand(String command)
 			sprintf("Invalid direction \'%d\' specified.\n", atoi(cmd[1]));
 			Serial.print(buffer);
 			#endif
-			
+
 			c.direction = Direction::FORWARD;	// Default to forward to avoid exception
 			break;
 	}
