@@ -10,38 +10,32 @@ import net.java.games.input.Controller;
 
 public class KeyboardHandler
 {
+	// Controller Object
 	private Controller keyboard;
 	
-	private boolean w_pressed = false, s_pressed = false;
+	// Constructor
+	public KeyboardHandler(Controller keyboard)	{ this.keyboard = keyboard; }
 	
-	public float accelAxis = 0.0f;
-	
-	public KeyboardHandler(Controller keyboard)
-	{
-		this.keyboard = keyboard;
-	}
-	
+	// Update method
 	public void update()
 	{
 		keyboard.poll();
 		
-		Component[] components = keyboard.getComponents();
+		final Component[] components = keyboard.getComponents();
 		for(Component c : components)
 		{
-			float val = c.getPollData();
-			Identifier id = c.getIdentifier();
+			final float val = c.getPollData();
+			final Identifier id = c.getIdentifier();
 			
 			if(val == 1.0f)
 			{
 				if(id == W)
 				{
 					// Forward
-					w_pressed = true;
 				}
 				if(id == S)
 				{
 					// Backward
-					s_pressed = true;
 				}
 				
 				if(id == A)
@@ -64,30 +58,13 @@ public class KeyboardHandler
 			{
 				if(id == W)
 				{
-					w_pressed = false;
+					// Stop W
 				}
 				if(id == S)
 				{
-					s_pressed = false;
+					// Stop S
 				}
 			}
-		}
-		
-		if(w_pressed && s_pressed)
-		{
-			accelAxis = 0.0f;
-		}
-		else if(w_pressed)
-		{
-			accelAxis = 1.0f;
-		}
-		else if(s_pressed)
-		{
-			accelAxis = -1.0f;
-		}
-		else
-		{
-			accelAxis = 0.0f;
 		}
 	}
 }
