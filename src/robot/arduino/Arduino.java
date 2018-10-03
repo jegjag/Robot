@@ -1,4 +1,4 @@
-package robot.core;
+package robot.arduino;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
