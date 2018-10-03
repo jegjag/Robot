@@ -41,8 +41,8 @@ public class Init
 		System.setProperty("sun.java2d.opengl", "True");
 		
 		// Load config
-		try										{ config = new Config(configFile); }
-		catch(IOException e)					{ e.printStackTrace(); }
+		try								{ config = new Config(configFile); }
+		catch(IOException e)			{ e.printStackTrace(); }
 		
 		// Create window
 		frame = new Window
@@ -79,8 +79,8 @@ public class Init
 	private static void update()
 	{
 		// Update controllers
-		if(cHandler != null)			cHandler.update();
-		else if(kHandler != null)		kHandler.update();
+		if(cHandler != null)					cHandler.update();
+		else if(kHandler != null)				kHandler.update();
 	}
 	
 	// Grid view

@@ -16,4 +16,9 @@ enum Motor
 	A, B
 };
 
+enum Direction
+{
+	FORWARD, BACKWARD
+};
+
 #endif
