@@ -12,8 +12,8 @@
 namespace Protocol
 {
 	// Protocol Enums
-	enum class Motor		: char { A = '0', B = '1' };
-	enum class Direction	: char { FORWARD = '1', BACKWARD = '0' };
+	enum class Motor		: char { A = 0, B = 1 };
+	enum class Direction	: char { FORWARD = 1, BACKWARD = 0 };
 
 	struct Command
 	{
