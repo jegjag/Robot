@@ -14,6 +14,8 @@ public class Config
 	public Config(File propertiesFile) throws IOException
 	{
 		cfgFile = propertiesFile;
+		properties = new Properties();
+		
 		if(!cfgFile.exists())
 		{
 			cfgFile.createNewFile();

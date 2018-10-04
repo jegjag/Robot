@@ -1,7 +1,5 @@
 package robot.core;
 
-import static java.lang.Math.*;
-
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
@@ -11,11 +9,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import net.java.games.input.Controller;
-import net.java.games.input.ControllerEnvironment;
-
-import robot.input.ControllerHandler;
-import robot.input.KeyboardHandler;
+import robot.input.KeyboardListener;
 import robot.protocol.Arduino;
 import robot.protocol.Command;
 
@@ -34,8 +28,7 @@ public class Init
 	public	static Arduino				arduino;
 	
 	// Input
-	public	static ControllerHandler	cHandler = null;
-	public	static KeyboardHandler		kHandler = null;
+	public	static KeyboardListener		keyListener;
 	
 	public static void main(String[] args) throws IOException, FileNotFoundException
 	{
@@ -55,13 +48,9 @@ public class Init
 			Integer.parseInt(config.get("height", "1280"))
 		);
 		
-		// Setup controllers
-		Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
-		for(Controller c : controllers)
-		{
-			if(c.getType() == Controller.Type.GAMEPAD)		{ cHandler = new ControllerHandler(c); break; }
-			if(c.getType() == Controller.Type.KEYBOARD)		{ kHandler = new KeyboardHandler(c); }
-		}
+		// Add keyboard listener
+		keyListener = new KeyboardListener();
+		frame.addKeyListener(keyListener);
 		
 		// Init arduino
 		arduino = new Arduino();
@@ -80,24 +69,16 @@ public class Init
 	
 	private static void update()
 	{
-		// Update controllers
-		if(cHandler != null)
+		Command[] operation = keyListener.update();
+		try
 		{
-			cHandler.update();
+			arduino.sendCommand(operation[0]);
+			arduino.sendCommand(operation[1]);
 		}
-		else if(kHandler != null)
+		catch(IOException e)
 		{
-			Command[] operation = kHandler.update();
-			try
-			{
-				arduino.sendCommand(operation[0]);
-				arduino.sendCommand(operation[1]);
-			}
-			catch(IOException e)
-			{
-				System.err.println("Failed to communicate with the Arduino.");
-				System.exit(-1);
-			}
+			System.err.println("Failed to communicate with the Arduino.");
+			System.exit(-1);
 		}
 	}
 	
@@ -114,47 +95,16 @@ public class Init
 		g2d.setColor(Color.BLACK);
 		g2d.fillRect(0, 0, frame.getWidth(), frame.getHeight());
 		
-		// Show analog trigger status
-		if(cHandler != null)
-		{
-			// Gamepad UI
-			float z = cHandler.axis_z;
-			if(cHandler.axis_z < 0)				{ g2d.setColor(new Color(0, 160, 0)); z *= -1; }
-			else if(cHandler.axis_z > 0)		{ g2d.setColor(new Color(100, 0, 0)); }
-			
-			g2d.fillRect
-			(
-				0, frame.getHeight() - round(z * frame.getHeight()),
-				frame.getWidth(), round(z * frame.getHeight())
-			);
-			
-			if(showGrid)
-			{
-				// Draw grid for X=0 and Y=0
-				g2d.setColor(Color.DARK_GRAY);
-				g2d.drawLine(frame.getWidth() / 2, 0, frame.getWidth() / 2, frame.getHeight());		// Y Plane
-				g2d.drawLine(0, frame.getHeight() / 2, frame.getWidth(), frame.getHeight() / 2);	// X Plane
-			}
-			
-			// Show position of left analog stick
-			int x = round(((frame.getWidth() / 2) + (cHandler.axis_x * frame.getWidth() / 2)) - 5);
-			int y = round((frame.getHeight() / 2) + (cHandler.axis_y * frame.getHeight() / 2) - 5);
-			
-			g2d.setColor(Color.RED);
-			g2d.fillOval(x, y, 10, 10);
-		}
-		else
-		{
-			final String msg = "Keyboard Mode";
-			g2d.setFont(new Font("Open Sans", Font.BOLD, 72));
-			g2d.setColor(Color.WHITE);
-			g2d.drawString
-			(
-				msg,
-				(frame.getWidth() / 2) - (g2d.getFontMetrics().stringWidth(msg) / 2),
-				(frame.getHeight() / 2) - (g2d.getFontMetrics().getHeight() / 2)
-			);
-		}
+		final String msg = "Keyboard Mode";
+		g2d.setFont(new Font("Open Sans", Font.BOLD, 72));
+		g2d.setColor(Color.WHITE);
+		g2d.drawString
+		(
+			msg,
+			(frame.getWidth() / 2) - (g2d.getFontMetrics().stringWidth(msg) / 2),
+			(frame.getHeight() / 2) - (g2d.getFontMetrics().getHeight() / 2)
+		);
+		
 		// Dispose
 		g2d.dispose();
 		
