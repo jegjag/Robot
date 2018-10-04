@@ -72,8 +72,8 @@ public class Init
 	
 	public static void exit()
 	{
-		try										{ config.save(); }
-		catch(IOException e)					{ e.printStackTrace(); }
+		try								{ config.save(); }
+		catch(IOException e)			{ e.printStackTrace(); }
 		
 		System.exit(0);
 	}
