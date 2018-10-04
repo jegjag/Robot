@@ -2,6 +2,7 @@ package robot.protocol;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Enumeration;
@@ -67,11 +68,19 @@ public class Arduino implements Closeable
 		}
 	}
 	
+	public void sendCommand(Command cmd) throws IOException
+	{
+		char[] byteArray = { cmd.motor.protocolByte, cmd.direction.protocolByte, (char) cmd.speed, '\n' };
+		writer.write(byteArray);
+	}
+	
 	@Override
 	public synchronized void close()
 	{
 		if(serialPort == null)	return;
 		serialPort.close();
+		try						{ writer.close(); output.close(); baos.close(); }
+		catch(IOException e)	{ e.printStackTrace(); }
 	}
 	
 	private final CommPortIdentifier findPortID()
@@ -84,11 +93,7 @@ public class Arduino implements Closeable
 			CommPortIdentifier currentPortID = (CommPortIdentifier) portEnum.nextElement();
 			for(String portName : PORT_NAMES)
 			{
-				if(currentPortID.getName().equals(portName))
-				{
-					id = currentPortID;
-					break;
-				}
+				if(currentPortID.getName().equals(portName))	{ id = currentPortID; break; }
 			}
 		}
 		

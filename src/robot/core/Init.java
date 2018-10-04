@@ -17,6 +17,7 @@ import net.java.games.input.ControllerEnvironment;
 import robot.input.ControllerHandler;
 import robot.input.KeyboardHandler;
 import robot.protocol.Arduino;
+import robot.protocol.Command;
 
 public class Init
 {
@@ -27,7 +28,7 @@ public class Init
 	// Display
 	public	static Window				frame;
 	private	static BufferedImage		canvas;
-	public	static final int			UPDATE_FREQ = 144;
+	public	static final int			UPDATE_FREQ = 60;
 	
 	// Arduino connection
 	public	static Arduino				arduino;
@@ -80,8 +81,24 @@ public class Init
 	private static void update()
 	{
 		// Update controllers
-		if(cHandler != null)					cHandler.update();
-		else if(kHandler != null)				kHandler.update();
+		if(cHandler != null)
+		{
+			cHandler.update();
+		}
+		else if(kHandler != null)
+		{
+			Command[] operation = kHandler.update();
+			try
+			{
+				arduino.sendCommand(operation[0]);
+				arduino.sendCommand(operation[1]);
+			}
+			catch(IOException e)
+			{
+				System.err.println("Failed to communicate with the Arduino.");
+				System.exit(-1);
+			}
+		}
 	}
 	
 	// Grid view
