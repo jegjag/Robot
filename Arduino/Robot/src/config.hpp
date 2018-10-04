@@ -16,7 +16,7 @@ namespace Config
 {
 	// Serial
 	const unsigned long SERIAL_SPEED = 9600L;	// 9.6Kb/s
-	const unsigned long SERIAL_TIMEOUT = 20L;	// 20ms
+	const unsigned long SERIAL_TIMEOUT = 10L;	// 10ms
 }
 
 #endif
