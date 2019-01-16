@@ -61,8 +61,8 @@ public class Init
 	
 	public static void exit()
 	{
-		try								{ config.save(); }
-		catch(IOException e)			{ e.printStackTrace(); }
+		try						{ config.save(); }
+		catch(IOException e)	{ e.printStackTrace(); }
 		
 		System.exit(0);
 	}
@@ -84,7 +84,7 @@ public class Init
 	
 	// Grid view
 	private static boolean showGrid = true;
-	public static void toggleGrid()				{ showGrid = !showGrid; }
+	public static void toggleGrid() { showGrid = !showGrid; }
 	
 	private static void render(double delta)
 	{
@@ -116,7 +116,7 @@ public class Init
 	
 	private static void run()
 	{
-		//Start loop
+		// Start loop
 		final long UPDATE_NANOS = 1000000000 / UPDATE_FREQ;
 		long previous = System.nanoTime();
 		long delay = 0L;
@@ -130,7 +130,7 @@ public class Init
 			previous = current;
 			delay += elapsed;
 			
-			//Update loop until catchup to real time, or if certain amount of time passed.
+			// Update loop until catchup to real time, or if certain amount of time passed.
 			while(delay >= UPDATE_NANOS)
 			{
 				update();
