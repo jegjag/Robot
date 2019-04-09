@@ -1,3 +1,3 @@
 # Trashboi #
 
-Todo make this
+A robot project made for fun mostly, could use a rework in the future.
